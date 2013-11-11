@@ -16,4 +16,14 @@ public class MessageTypes {
     static class RunningStatus {
 
     }
+
+    static class RamStatus {
+        final String status;
+        RamStatus(String status){
+            this.status = status;
+        }
+        String getStatus(){
+            return status;
+        }
+    }
 }

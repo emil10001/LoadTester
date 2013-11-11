@@ -8,6 +8,7 @@ import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
 
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -31,7 +32,6 @@ public class ThreadSpawn extends Service {
     static TimedKillTask killer;
     static StartTask startTask;
     static KillTask killTask;
-
 
     private static boolean isWorking = false;
 
@@ -75,8 +75,11 @@ public class ThreadSpawn extends Service {
     static void startSpawner() {
         if (isRunning())
             return;
-        if (isWorking)
+        if (isWorking) {
+            BusProvider.INSTANCE.bus().post(new MessageTypes.CpuStatus("wait until previous task completed"));
+            BusProvider.INSTANCE.bus().post(new MessageTypes.RamStatus(""));
             return;
+        }
 
         Log.d(TAG, "startSpawner");
         startTask = new StartTask();
@@ -90,8 +93,11 @@ public class ThreadSpawn extends Service {
     static void stopSpawner() {
         if (!isRunning())
             return;
-        if (isWorking)
+        if (isWorking) {
+            BusProvider.INSTANCE.bus().post(new MessageTypes.CpuStatus("wait until previous task completed"));
+            BusProvider.INSTANCE.bus().post(new MessageTypes.RamStatus(""));
             return;
+        }
 
         Log.d(TAG, "stopSpawner");
         killTask = new KillTask();
@@ -106,13 +112,33 @@ public class ThreadSpawn extends Service {
         srv.stopSelf();
     }
 
+    static void switchModes(Constants mode) {
+        if (isWorking) {
+            BusProvider.INSTANCE.bus().post(new MessageTypes.CpuStatus("wait until previous task completed"));
+            BusProvider.INSTANCE.bus().post(new MessageTypes.RamStatus(""));
+            return;
+        }
+        if (Constants.MODE == mode) {
+            BusProvider.INSTANCE.bus().post(new MessageTypes.CpuStatus("already in that mode, ignoring"));
+            BusProvider.INSTANCE.bus().post(new MessageTypes.RamStatus(""));
+            return;
+        }
+
+        SwitchModes switchMode = new SwitchModes();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
+            switchMode.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, mode);
+        else
+            switchMode.execute(mode);
+    }
+
     static void enqueue() {
         if (isRunning())
             return;
 
         if (!isRunning())
             executorService
-                    = new ThreadPoolExecutor(Constants.NUM_THREADS, Constants.NUM_THREADS, 30, TimeUnit.SECONDS, writerQueue, new ThreadPoolExecutor.CallerRunsPolicy());
+                    = new ThreadPoolExecutor(Constants.MODE.NUM_THREADS, Constants.MODE.NUM_THREADS, 30, TimeUnit.SECONDS, writerQueue, new ThreadPoolExecutor.CallerRunsPolicy());
         else if (!executorService.isShutdown()) {
             Log.e(TAG, "This should never happen, enqueue called with an active executorService");
             return;
@@ -122,12 +148,12 @@ public class ThreadSpawn extends Service {
         BusProvider.INSTANCE.bus().post(new MessageTypes.RunningStatus());
 
         running = true;
-        for (int i = 0; i < Constants.NUM_CPU_THREADS; i++) {
+        for (int i = 0; i < Constants.MODE.NUM_CPU_THREADS; i++) {
             Log.d(TAG, "enqueue #" + i);
             Future<?> task = executorService.submit(new PiCalc.CalcTask());
             tasks.put(i, task);
         }
-        for (int i = Constants.NUM_CPU_THREADS; i < (Constants.NUM_CPU_THREADS + Constants.NUM_RAM_THREADS); i++) {
+        for (int i = Constants.MODE.NUM_CPU_THREADS; i < (Constants.MODE.NUM_CPU_THREADS + Constants.MODE.NUM_RAM_THREADS); i++) {
             Log.d(TAG, "enqueue #" + i);
             Future<?> task = executorService.submit(new ImgLoader.ImgLoaderTask());
             tasks.put(i, task);
@@ -160,12 +186,57 @@ public class ThreadSpawn extends Service {
     }
 
     private static void removeAllTasks() {
+        if (null == tasks)
+            return;
+
         for (Integer i : tasks.keySet()) {
             Future<?> task = tasks.get(i);
             if (null != task)
                 task.cancel(true);
             tasks.remove(i);
         }
+    }
+
+    static class SwitchModes extends AsyncTask<Constants, Void, Void> {
+        @Override
+        protected Void doInBackground(Constants... params) {
+            Log.w(TAG, "StartTask");
+            if (null == params[0])
+                return null;
+
+            isWorking = true;
+            Constants.MODE = params[0];
+            if (null != killer)
+                killer.cancel(true);
+            if (null != watcher)
+                watcher.cancel(true);
+
+            killSwitch();
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+            }
+
+            enqueue();
+
+            isWorking = false;
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            killer = new TimedKillTask();
+            watcher = new Watcher();
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                killer.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[]) null);
+                watcher.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[]) null);
+            } else {
+                killer.execute((Void[]) null);
+                watcher.execute((Void[]) null);
+            }
+        }
+
     }
 
     static class StartTask extends AsyncTask<Void, Void, Void> {
@@ -183,8 +254,13 @@ public class ThreadSpawn extends Service {
             killer = new TimedKillTask();
             watcher = new Watcher();
 
-            killer.execute();
-            watcher.execute();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                killer.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[]) null);
+                watcher.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[]) null);
+            } else {
+                killer.execute((Void[]) null);
+                watcher.execute((Void[]) null);
+            }
         }
     }
 
@@ -219,16 +295,19 @@ public class ThreadSpawn extends Service {
                         if (null != task.get())
                             continue;
 
-                        if (i < Constants.NUM_CPU_THREADS) {
+                        if (i < Constants.MODE.NUM_CPU_THREADS) {
                             Future<?> newTask = executorService.submit(new PiCalc.CalcTask());
                             tasks.put(i, newTask);
-                        } else if (i < Constants.NUM_CPU_THREADS + Constants.NUM_RAM_THREADS) {
+                        } else if (i < Constants.MODE.NUM_CPU_THREADS + Constants.MODE.NUM_RAM_THREADS) {
                             Future<?> newTask = executorService.submit(new ImgLoader.ImgLoaderTask());
                             tasks.put(i, newTask);
                         } else {
                             tasks.remove(i);
                         }
                     } catch (InterruptedException e) {
+                        killSwitch();
+                        return null;
+                    } catch (CancellationException e) {
                         killSwitch();
                         return null;
                     } catch (ExecutionException e) {

@@ -12,7 +12,7 @@ public class PiCalc {
         double sum = 0.0;      // final sum
         double term;           // term without sign
         double sign = 1.0;     // sign on each term
-        long endTime = System.currentTimeMillis() + Constants.CPU_ON_TIME;
+        long endTime = System.currentTimeMillis() + Constants.MODE.CPU_ON_TIME;
         int k = 0;
         while (System.currentTimeMillis() < endTime) {
             term = 1.0 / (2.0 * k + 1.0);
@@ -36,7 +36,7 @@ public class PiCalc {
                     Log.w(TAG, "Exiting gracefully");
                     return;
                 }
-                Thread.sleep(Constants.CPU_IDLE_TIME);
+                Thread.sleep(Constants.MODE.CPU_IDLE_TIME);
             } catch (InterruptedException ex) {
             }
         }

@@ -55,8 +55,8 @@ public class MainActivity extends ActionBarActivity {
      * A placeholder fragment containing a simple view.
      */
     public static class PlaceholderFragment extends Fragment {
-        private TextView cpuStatus;
-        private Button startStop;
+        private TextView cpuStatus, ramStatus;
+        private Button startStop, low, medium, high;
         private Handler handler;
 
         public PlaceholderFragment() {
@@ -70,8 +70,13 @@ public class MainActivity extends ActionBarActivity {
             handler = new Handler();
 
             cpuStatus = (TextView) rootView.findViewById(R.id.cpu_status);
+            ramStatus = (TextView) rootView.findViewById(R.id.ram_status);
 
             startStop = (Button) rootView.findViewById(R.id.start_stop);
+            low = (Button) rootView.findViewById(R.id.low);
+            medium = (Button) rootView.findViewById(R.id.medium);
+            high = (Button) rootView.findViewById(R.id.high);
+
             startStop.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -82,6 +87,25 @@ public class MainActivity extends ActionBarActivity {
                     } else {
                         ThreadSpawn.startSpawner();
                     }
+                }
+            });
+
+            low.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    ThreadSpawn.switchModes(Constants.LOW);
+                }
+            });
+            medium.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    ThreadSpawn.switchModes(Constants.MEDIUM);
+                }
+            });
+            high.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    ThreadSpawn.switchModes(Constants.HIGH);
                 }
             });
 
@@ -127,6 +151,15 @@ public class MainActivity extends ActionBarActivity {
                 @Override
                 public void run() {
                     cpuStatus.setText(status.getStatus());
+                }
+            });
+        }
+        @Subscribe
+        public void updateRamStatus(final MessageTypes.RamStatus status) {
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    ramStatus.setText(status.getStatus());
                 }
             });
         }

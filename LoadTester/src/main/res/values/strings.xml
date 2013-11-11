@@ -8,6 +8,10 @@
     <string name="start">Start</string>
     <string name="stop">Stop</string>
 
+    <string name="low">Low</string>
+    <string name="medium">Medium</string>
+    <string name="high">High</string>
+
     <string name="cpu_threads">Number of CPU threads</string>
 
 </resources>

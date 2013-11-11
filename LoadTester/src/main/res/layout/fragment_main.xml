@@ -25,6 +25,33 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 
+    <LinearLayout
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent">
+
+        <Button
+            android:id="@+id/low"
+            android:layout_height="48dp"
+            android:layout_width="80dp"
+            android:text="@string/low"
+            android:layout_weight="1" />
+
+        <Button
+            android:id="@+id/medium"
+            android:layout_height="48dp"
+            android:layout_width="80dp"
+            android:text="@string/medium"
+            android:layout_weight="1" />
+
+        <Button
+            android:id="@+id/high"
+            android:layout_height="48dp"
+            android:layout_width="80dp"
+            android:text="@string/high"
+            android:layout_weight="1" />
+
+    </LinearLayout>
+
     <!--<RSSurfaceView-->
     <!--android:id="@+id/rs_view"-->
     <!--android:layout_height="300dp"-->

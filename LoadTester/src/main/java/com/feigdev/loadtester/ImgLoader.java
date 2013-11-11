@@ -26,10 +26,18 @@ public class ImgLoader {
             Resources res = ThreadSpawn.appContext.getResources();
             bmp = BitmapFactory.decodeResource(res, R.drawable.alf, options);
             Log.d(TAG, "generated image");
+
+            BusProvider.INSTANCE.bus().post(new MessageTypes.RamStatus(Thread.currentThread().getId()
+                    + ": generated image"));
+
         } catch (OutOfMemoryError e) {
+            BusProvider.INSTANCE.bus().post(new MessageTypes.RamStatus(Thread.currentThread().getId()
+                    + ": getPic OutOfMemoryError =("));
             Log.w(TAG, "getPic OutOfMemoryError =(");
             return null;
         } catch (Exception e) {
+            BusProvider.INSTANCE.bus().post(new MessageTypes.RamStatus(Thread.currentThread().getId()
+                    + ": getPic blew up =("));
             Log.w(TAG, "getPic blew up =(");
             return null;
         }
@@ -55,10 +63,16 @@ public class ImgLoader {
             if (null != bmp2 && (getBitmapSize(bmp) < getBitmapSize(bmp2)))
                 bmp = bmp2;
 
+            BusProvider.INSTANCE.bus().post(new MessageTypes.RamStatus(Thread.currentThread().getId()
+                    + ": generated image 2"));
             Log.d(TAG, "generated image 2");
         } catch (OutOfMemoryError e) {
+            BusProvider.INSTANCE.bus().post(new MessageTypes.RamStatus(Thread.currentThread().getId()
+                    + ": getPic2 OutOfMemoryError =("));
             Log.w(TAG, "getPic2 OutOfMemoryError =(");
         } catch (Exception e) {
+            BusProvider.INSTANCE.bus().post(new MessageTypes.RamStatus(Thread.currentThread().getId()
+                    + ": getPic blew up =("));
             Log.w(TAG, "getPic2 blew up =(");
         }
 
@@ -78,7 +92,7 @@ public class ImgLoader {
         if (null == bmp)
             return;
 
-        int place = counter % Constants.NUM_STORED_IMAGES;
+        int place = counter % Constants.MODE.NUM_STORED_IMAGES;
         if (null == bitstore)
             bitstore = new ConcurrentHashMap<Integer, Bitmap>();
 
@@ -87,6 +101,9 @@ public class ImgLoader {
             counter++;
         } catch (OutOfMemoryError e) {
             Log.w(TAG, "bitstore OutOfMemoryError =(");
+            BusProvider.INSTANCE.bus().post(new MessageTypes.RamStatus(Thread.currentThread().getId()
+                    + ": bitstore OutOfMemoryError =("));
+
         }
     }
 
@@ -95,15 +112,25 @@ public class ImgLoader {
         public void run() {
             try {
                 Log.d(TAG, "start running");
+                BusProvider.INSTANCE.bus().post(new MessageTypes.RamStatus(Thread.currentThread().getId()
+                        + ": start running"));
+
                 loadImage();
                 if (Thread.currentThread().isInterrupted()) {
                     Log.d(TAG, "Exiting gracefully");
+                    BusProvider.INSTANCE.bus().post(new MessageTypes.RamStatus(Thread.currentThread().getId()
+                            + ": finished"));
+
                     return;
                 }
-                Thread.sleep(Constants.RAM_IDLE_TIME);
+                Thread.sleep(Constants.MODE.RAM_IDLE_TIME);
             } catch (InterruptedException ex) {
+                BusProvider.INSTANCE.bus().post(new MessageTypes.RamStatus(Thread.currentThread().getId()
+                        + ": finished"));
                 return;
             }
+            BusProvider.INSTANCE.bus().post(new MessageTypes.RamStatus(Thread.currentThread().getId()
+                    + ": finished"));
         }
     }
 
