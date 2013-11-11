@@ -1,0 +1,30 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:0.6.+'
+    }
+}
+apply plugin: 'android'
+
+repositories {
+    mavenCentral()
+}
+
+android {
+    compileSdkVersion 19
+    buildToolsVersion "18.1.1"
+
+    defaultConfig {
+        minSdkVersion 7
+        targetSdkVersion 19
+        renderscriptTargetApi 19
+    }
+}
+
+dependencies {
+    compile 'com.android.support:support-v4:18.+'
+    compile 'com.android.support:appcompat-v7:18.+'
+    compile 'com.squareup:otto:1.3.4'
+}
