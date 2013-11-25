@@ -14,4 +14,18 @@
 
     <string name="cpu_threads">Number of CPU threads</string>
 
+    <string-array name="mode_array">
+        <item>Low</item>
+        <item>Medium</item>
+        <item>High</item>
+    </string-array>
+
+    <string name="cpu_enabled">Load CPU</string>
+    <string name="ram_enabled">Load RAM</string>
+    <string name="net_enabled">Load Network</string>
+
+    <string name="cpu_description">I\'ll calculate PI until you tell me to stop. The number of threads, and amount of time each task runs for will depend on the load (Low/Medium/High) setting.</string>
+    <string name="ram_description">Load up some images in memory. It\'s just a gradient, I promise I didn\'t violate anyone\'s copyright! The number of images I try to store depends on the load setting, but the amount of memory that I can eat up is limited by the system.</string>
+    <string name="net_description">I\'m going to try to download an image off of S3. I will run on a couple more threads and more frequently if you increase the load.</string>
+
 </resources>

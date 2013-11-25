@@ -1,61 +1,122 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".MainActivity$PlaceholderFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context=".MainActivity$PlaceholderFragment"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingBottom="@dimen/activity_vertical_margin">
-
-    <Button
-        android:id="@+id/start_stop"
-        android:layout_height="48dp"
-        android:layout_width="80dp"
-        android:text="@string/start" />
-
-    <TextView
-        android:id="@+id/cpu_status"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-
-    <TextView
-        android:id="@+id/ram_status"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+    android:background="@drawable/bg">
 
     <LinearLayout
-        android:layout_height="wrap_content"
-        android:layout_width="match_parent">
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingTop="@dimen/activity_vertical_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingBottom="@dimen/activity_vertical_margin">
 
-        <Button
-            android:id="@+id/low"
-            android:layout_height="48dp"
-            android:layout_width="80dp"
-            android:text="@string/low"
-            android:layout_weight="1" />
 
-        <Button
-            android:id="@+id/medium"
+        <LinearLayout
             android:layout_height="48dp"
-            android:layout_width="80dp"
-            android:text="@string/medium"
-            android:layout_weight="1" />
+            android:layout_width="match_parent"
+            android:orientation="horizontal">
 
-        <Button
-            android:id="@+id/high"
+            <Button
+                android:id="@+id/start_stop"
+                android:layout_height="48dp"
+                android:layout_width="80dp"
+                android:text="@string/start" />
+
+            <Spinner
+                android:id="@+id/mode_selector"
+                android:layout_height="48dp"
+                android:layout_width="match_parent" />
+        </LinearLayout>
+
+
+        <View
+            android:layout_height="32dp"
+            android:layout_width="match_parent"/>
+
+        <Switch
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/cpu_enabled"
+            android:id="@+id/cpu_enabled"
+            android:clickable="true"
+            android:enabled="true"
+            android:textSize="18sp" />
+
+        <View
+            android:layout_height="1px"
+            android:layout_width="match_parent"
+            android:background="#383838" />
+
+        <TextView
+            android:id="@+id/cpu_description"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/cpu_description"
+            android:textSize="11sp" />
+
+        <TextView
+            android:id="@+id/cpu_status"
+            android:layout_width="match_parent"
             android:layout_height="48dp"
-            android:layout_width="80dp"
-            android:text="@string/high"
-            android:layout_weight="1" />
+            android:textColor="#686868" />
+
+        <Switch
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/ram_enabled"
+            android:id="@+id/ram_enabled"
+            android:clickable="true"
+            android:enabled="true"
+            android:textSize="18sp" />
+
+        <View
+            android:layout_height="1px"
+            android:layout_width="match_parent"
+            android:background="#383838" />
+
+        <TextView
+            android:id="@+id/ram_description"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/ram_description"
+            android:textSize="11sp" />
+
+        <TextView
+            android:id="@+id/ram_status"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:textColor="#686868" />
+
+        <Switch
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/net_enabled"
+            android:id="@+id/net_enabled"
+            android:clickable="true"
+            android:enabled="true"
+            android:textSize="18sp" />
+
+        <View
+            android:layout_height="1px"
+            android:layout_width="match_parent"
+            android:background="#383838" />
+
+        <TextView
+            android:id="@+id/net_description"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/net_description"
+            android:textSize="11sp" />
+
+        <TextView
+            android:id="@+id/net_status"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:textColor="#686868" />
 
     </LinearLayout>
-
-    <!--<RSSurfaceView-->
-    <!--android:id="@+id/rs_view"-->
-    <!--android:layout_height="300dp"-->
-    <!--android:layout_width="300dp"-->
-    <!--android:layout_alignParentBottom="true" />-->
-
-</LinearLayout>
+</ScrollView>

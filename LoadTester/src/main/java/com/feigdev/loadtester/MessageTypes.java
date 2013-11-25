@@ -6,24 +6,39 @@ package com.feigdev.loadtester;
 public class MessageTypes {
     static class CpuStatus {
         final String status;
-        CpuStatus(String status){
+
+        CpuStatus(String status) {
             this.status = status;
         }
-        String getStatus(){
+
+        String getStatus() {
             return status;
         }
     }
+
     static class RunningStatus {
 
     }
 
     static class RamStatus {
         final String status;
-        RamStatus(String status){
+
+        RamStatus(String status) {
             this.status = status;
         }
-        String getStatus(){
+
+        String getStatus() {
             return status;
         }
+    }
+
+    static class NetStatus {
+        final String status;
+
+        NetStatus(String status) {
+            this.status = status;
+        }
+
+        String getStatus() { return status; }
     }
 }

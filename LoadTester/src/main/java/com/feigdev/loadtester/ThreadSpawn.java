@@ -78,6 +78,7 @@ public class ThreadSpawn extends Service {
         if (isWorking) {
             BusProvider.INSTANCE.bus().post(new MessageTypes.CpuStatus("wait until previous task completed"));
             BusProvider.INSTANCE.bus().post(new MessageTypes.RamStatus(""));
+            BusProvider.INSTANCE.bus().post(new MessageTypes.NetStatus(""));
             return;
         }
 
@@ -91,11 +92,17 @@ public class ThreadSpawn extends Service {
     }
 
     static void stopSpawner() {
-        if (!isRunning())
+        if (!isRunning()){
+            BusProvider.INSTANCE.bus().post(new MessageTypes.CpuStatus(""));
+            BusProvider.INSTANCE.bus().post(new MessageTypes.RamStatus(""));
+            BusProvider.INSTANCE.bus().post(new MessageTypes.NetStatus(""));
             return;
+        }
+
         if (isWorking) {
             BusProvider.INSTANCE.bus().post(new MessageTypes.CpuStatus("wait until previous task completed"));
             BusProvider.INSTANCE.bus().post(new MessageTypes.RamStatus(""));
+            BusProvider.INSTANCE.bus().post(new MessageTypes.NetStatus(""));
             return;
         }
 
@@ -106,6 +113,10 @@ public class ThreadSpawn extends Service {
             killTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[]) null);
         else
             killTask.execute((Void[]) null);
+
+        BusProvider.INSTANCE.bus().post(new MessageTypes.CpuStatus(""));
+        BusProvider.INSTANCE.bus().post(new MessageTypes.RamStatus(""));
+        BusProvider.INSTANCE.bus().post(new MessageTypes.NetStatus(""));
     }
 
     static void killSpawner() {
@@ -148,15 +159,22 @@ public class ThreadSpawn extends Service {
         BusProvider.INSTANCE.bus().post(new MessageTypes.RunningStatus());
 
         running = true;
-        for (int i = 0; i < Constants.MODE.NUM_CPU_THREADS; i++) {
+        for (int i = 0; i < Constants.MODE.NUM_THREADS; i++) {
             Log.d(TAG, "enqueue #" + i);
-            Future<?> task = executorService.submit(new PiCalc.CalcTask());
-            tasks.put(i, task);
-        }
-        for (int i = Constants.MODE.NUM_CPU_THREADS; i < (Constants.MODE.NUM_CPU_THREADS + Constants.MODE.NUM_RAM_THREADS); i++) {
-            Log.d(TAG, "enqueue #" + i);
-            Future<?> task = executorService.submit(new ImgLoader.ImgLoaderTask());
-            tasks.put(i, task);
+            Future<?> task = null;
+            if (i < Constants.MODE.NUM_CPU_THREADS) {
+                if (Constants.MODE.CPU_ENABLED)
+                    task = executorService.submit(new PiCalc.CalcTask());
+            } else if (i < Constants.MODE.NUM_CPU_THREADS + Constants.MODE.NUM_RAM_THREADS) {
+                if (Constants.MODE.RAM_ENABLED)
+                    task = executorService.submit(new ImgLoader.ImgLoaderTask());
+            } else if (i < Constants.MODE.NUM_THREADS) {
+                if (Constants.MODE.NET_ENABLED)
+                    task = executorService.submit(new NetworkLoad.NetworkLoaderTask());
+            }
+
+            if (null != task)
+                tasks.put(i, task);
         }
 
     }
@@ -295,15 +313,23 @@ public class ThreadSpawn extends Service {
                         if (null != task.get())
                             continue;
 
+                        Future<?> newTask = null;
                         if (i < Constants.MODE.NUM_CPU_THREADS) {
-                            Future<?> newTask = executorService.submit(new PiCalc.CalcTask());
-                            tasks.put(i, newTask);
+                            if (Constants.MODE.CPU_ENABLED)
+                                newTask = executorService.submit(new PiCalc.CalcTask());
                         } else if (i < Constants.MODE.NUM_CPU_THREADS + Constants.MODE.NUM_RAM_THREADS) {
-                            Future<?> newTask = executorService.submit(new ImgLoader.ImgLoaderTask());
-                            tasks.put(i, newTask);
-                        } else {
-                            tasks.remove(i);
+                            if (Constants.MODE.RAM_ENABLED)
+                                newTask = executorService.submit(new ImgLoader.ImgLoaderTask());
+                        } else if (i < Constants.MODE.NUM_THREADS) {
+                            if (Constants.MODE.NET_ENABLED)
+                                newTask = executorService.submit(new NetworkLoad.NetworkLoaderTask());
                         }
+
+                        if (null != newTask)
+                            tasks.put(i, newTask);
+                        else
+                            tasks.remove(i);
+
                     } catch (InterruptedException e) {
                         killSwitch();
                         return null;

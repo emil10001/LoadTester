@@ -24,7 +24,7 @@ public class ImgLoader {
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inSampleSize = 2;
             Resources res = ThreadSpawn.appContext.getResources();
-            bmp = BitmapFactory.decodeResource(res, R.drawable.alf, options);
+            bmp = BitmapFactory.decodeResource(res, R.drawable.test, options);
             Log.d(TAG, "generated image");
 
             BusProvider.INSTANCE.bus().post(new MessageTypes.RamStatus(Thread.currentThread().getId()
@@ -79,7 +79,7 @@ public class ImgLoader {
         return bmp;
     }
 
-    private static int getBitmapSize(Bitmap data) {
+    public static int getBitmapSize(Bitmap data) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB_MR1) {
             return data.getRowBytes() * data.getHeight();
         } else {
@@ -125,12 +125,11 @@ public class ImgLoader {
                 }
                 Thread.sleep(Constants.MODE.RAM_IDLE_TIME);
             } catch (InterruptedException ex) {
+                Log.d(TAG,"Interrupted");
+            } finally {
                 BusProvider.INSTANCE.bus().post(new MessageTypes.RamStatus(Thread.currentThread().getId()
                         + ": finished"));
-                return;
             }
-            BusProvider.INSTANCE.bus().post(new MessageTypes.RamStatus(Thread.currentThread().getId()
-                    + ": finished"));
         }
     }
 

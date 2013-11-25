@@ -7,6 +7,7 @@ import android.util.Log;
  */
 public class PiCalc {
     public static final String TAG = "PiCalc";
+    private static int counter = 0;
 
     public static void slowCalc() {
         double sum = 0.0;      // final sum
@@ -30,6 +31,9 @@ public class PiCalc {
         @Override
         public void run() {
             try {
+                Thread.sleep(Constants.MODE.CPU_STAGGER * counter);
+                Log.d(TAG, "start delayed " + Constants.MODE.CPU_STAGGER * counter);
+                counter =  (counter + 1 )% Constants.MODE.NUM_CPU_THREADS;
                 Log.d(TAG, "start running");
                 PiCalc.slowCalc();
                 if (Thread.currentThread().isInterrupted()) {
