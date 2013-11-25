@@ -33,9 +33,9 @@ public enum Constants {
 
     final int NUM_THREADS;
 
-    boolean CPU_ENABLED = true;
-    boolean RAM_ENABLED = true;
-    boolean NET_ENABLED = true;
+    static boolean CPU_ENABLED = true;
+    static boolean RAM_ENABLED = true;
+    static boolean NET_ENABLED = true;
 
     static Constants MODE = LOW;
 

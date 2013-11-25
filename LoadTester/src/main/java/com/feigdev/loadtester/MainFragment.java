@@ -171,19 +171,19 @@ public class MainFragment extends Fragment implements AdapterView.OnItemSelected
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         if (buttonView.getId() == cpuEnabled.getId()) {
             if (isChecked)
-                Constants.MODE.CPU_ENABLED = true;
+                Constants.CPU_ENABLED = true;
             else
-                Constants.MODE.CPU_ENABLED = false;
+                Constants.CPU_ENABLED = false;
         } else if (buttonView.getId() == ramEnabled.getId()) {
             if (isChecked)
-                Constants.MODE.RAM_ENABLED = true;
+                Constants.RAM_ENABLED = true;
             else
-                Constants.MODE.RAM_ENABLED = false;
+                Constants.RAM_ENABLED = false;
         } else if (buttonView.getId() == netEnabled.getId()) {
             if (isChecked)
-                Constants.MODE.NET_ENABLED = true;
+                Constants.NET_ENABLED = true;
             else
-                Constants.MODE.NET_ENABLED = false;
+                Constants.NET_ENABLED = false;
         }
     }
 }

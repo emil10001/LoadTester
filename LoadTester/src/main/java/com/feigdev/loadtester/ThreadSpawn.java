@@ -120,7 +120,8 @@ public class ThreadSpawn extends Service {
     }
 
     static void killSpawner() {
-        srv.stopSelf();
+        if (null != srv)
+            srv.stopSelf();
     }
 
     static void switchModes(Constants mode) {
@@ -163,13 +164,13 @@ public class ThreadSpawn extends Service {
             Log.d(TAG, "enqueue #" + i);
             Future<?> task = null;
             if (i < Constants.MODE.NUM_CPU_THREADS) {
-                if (Constants.MODE.CPU_ENABLED)
+                if (Constants.CPU_ENABLED)
                     task = executorService.submit(new PiCalc.CalcTask());
             } else if (i < Constants.MODE.NUM_CPU_THREADS + Constants.MODE.NUM_RAM_THREADS) {
-                if (Constants.MODE.RAM_ENABLED)
+                if (Constants.RAM_ENABLED)
                     task = executorService.submit(new ImgLoader.ImgLoaderTask());
             } else if (i < Constants.MODE.NUM_THREADS) {
-                if (Constants.MODE.NET_ENABLED)
+                if (Constants.NET_ENABLED)
                     task = executorService.submit(new NetworkLoad.NetworkLoaderTask());
             }
 
@@ -315,13 +316,13 @@ public class ThreadSpawn extends Service {
 
                         Future<?> newTask = null;
                         if (i < Constants.MODE.NUM_CPU_THREADS) {
-                            if (Constants.MODE.CPU_ENABLED)
+                            if (Constants.CPU_ENABLED)
                                 newTask = executorService.submit(new PiCalc.CalcTask());
                         } else if (i < Constants.MODE.NUM_CPU_THREADS + Constants.MODE.NUM_RAM_THREADS) {
-                            if (Constants.MODE.RAM_ENABLED)
+                            if (Constants.RAM_ENABLED)
                                 newTask = executorService.submit(new ImgLoader.ImgLoaderTask());
                         } else if (i < Constants.MODE.NUM_THREADS) {
-                            if (Constants.MODE.NET_ENABLED)
+                            if (Constants.NET_ENABLED)
                                 newTask = executorService.submit(new NetworkLoad.NetworkLoaderTask());
                         }
 
