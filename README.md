@@ -35,6 +35,8 @@ And, when you're done, you can kill it too:
     launchLoadTest.putExtra("KILL_NOW", "KILL_NOW");
     sendBroadcast(launchLoadTest);
 
+[Here is a project that launches and kills the LoadTester.](https://github.com/emil10001/LoadTestLauncher)
+
 ## Notes
 
 The configurations for load might need to be tweaked. It's all just guess work at this point, and while I was able to put enough load on my Nexus 5 to freeze it up completely, I haven't figured out what the best parameters are for a consistent load on each setting. Feel free to make pull requests with different values.
