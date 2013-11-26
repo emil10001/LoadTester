@@ -29,6 +29,12 @@
             android:label="Thread Spawn"
             android:enabled="true" >
         </service>
+        <receiver android:name="LoadApi" >
+            <intent-filter>
+                <action android:name="com.feigdev.loadtester.api" >
+                </action>
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

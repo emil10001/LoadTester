@@ -6,16 +6,16 @@ package com.feigdev.loadtester;
 public enum Constants {
     LOW(6, 1000, 1000 * 5,
             2, 8, 1000 * 3,
-            4, 2000, 1000 * 10),
-    MEDIUM(12, 1000, 1000 * 3,
+            1, 2000, 1000 * 10),
+    MEDIUM(12, 1000, 1000 * 2,
             2, 16, 100,
-            8, 1000, 1000 * 5),
-    HIGH(28, 1000, 1000 * 2,
+            4, 1000, 1000 * 5),
+    HIGH(20, 1000, 500,
             4, 32, 500,
-            12, 500, 500);
+            6, 500, 500);
 
-    static final boolean TIMED_KILL = false;
-    static final long KEEP_ALIVE = 1000 * 60;
+    static boolean TIMED_KILL = false;
+    static long KEEP_ALIVE = 1000 * 60;
 
     final int NUM_CPU_THREADS;
     final long CPU_ON_TIME;

@@ -41,4 +41,14 @@ public class MessageTypes {
 
         String getStatus() { return status; }
     }
+
+    static class Status {
+        final String status;
+
+        Status(String status) {
+            this.status = status;
+        }
+
+        String getStatus() { return status; }
+    }
 }

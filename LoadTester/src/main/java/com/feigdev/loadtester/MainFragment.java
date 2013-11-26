@@ -21,7 +21,7 @@ import com.squareup.otto.Subscribe;
  * Created by ejf3 on 11/24/13.
  */
 public class MainFragment extends Fragment implements AdapterView.OnItemSelectedListener, CompoundButton.OnCheckedChangeListener {
-    private TextView cpuStatus, ramStatus, netStatus;
+    private TextView status, cpuStatus, ramStatus, netStatus, cpuDescription, ramDescription, netDescription;
     private Button startStop;
     private Handler handler;
     private Switch cpuEnabled, ramEnabled, netEnabled;
@@ -34,11 +34,19 @@ public class MainFragment extends Fragment implements AdapterView.OnItemSelected
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
+        Constants.TIMED_KILL = false;
+        Constants.KEEP_ALIVE = 60 * 1000;
+
         handler = new Handler();
 
+        status = (TextView) rootView.findViewById(R.id.status);
         cpuStatus = (TextView) rootView.findViewById(R.id.cpu_status);
         ramStatus = (TextView) rootView.findViewById(R.id.ram_status);
         netStatus = (TextView) rootView.findViewById(R.id.net_status);
+
+        cpuDescription = (TextView) rootView.findViewById(R.id.cpu_description);
+        ramDescription = (TextView) rootView.findViewById(R.id.ram_description);
+        netDescription = (TextView) rootView.findViewById(R.id.net_description);
 
         cpuEnabled = (Switch) rootView.findViewById(R.id.cpu_enabled);
         ramEnabled = (Switch) rootView.findViewById(R.id.ram_enabled);
@@ -81,6 +89,8 @@ public class MainFragment extends Fragment implements AdapterView.OnItemSelected
 
         spinner.setOnItemSelectedListener(this);
 
+        updateDescriptions(Constants.MODE);
+
         return rootView;
     }
 
@@ -106,23 +116,42 @@ public class MainFragment extends Fragment implements AdapterView.OnItemSelected
 
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        Constants mode = Constants.MODE;
         switch (position) {
             case 0: // low
-                ThreadSpawn.switchModes(Constants.LOW);
+                mode = Constants.LOW;
+                ThreadSpawn.switchModes(mode);
                 break;
             case 1: // medium
-                ThreadSpawn.switchModes(Constants.MEDIUM);
+                mode = Constants.MEDIUM;
+                ThreadSpawn.switchModes(mode);
                 break;
             case 2: // high
-                ThreadSpawn.switchModes(Constants.HIGH);
+                mode = Constants.HIGH;
+                ThreadSpawn.switchModes(mode);
                 break;
         }
+        updateDescriptions(mode);
     }
 
     @Override
     public void onNothingSelected(AdapterView<?> parent) {
         // do nothing
     }
+
+    private void updateDescriptions(Constants mode) {
+        String cpu = String.format(getResources().getString(R.string.cpu_description),
+                mode.NUM_CPU_THREADS, mode.CPU_ON_TIME, mode.CPU_IDLE_TIME);
+        String ram = String.format(getResources().getString(R.string.ram_description),
+                mode.NUM_RAM_THREADS, mode.NUM_STORED_IMAGES, mode.RAM_IDLE_TIME);
+        String net = String.format(getResources().getString(R.string.net_description),
+                mode.NUM_NET_THREADS, mode.NET_DELAY_TIME + mode.NET_IDLE_TIME);
+
+        cpuDescription.setText(cpu);
+        ramDescription.setText(ram);
+        netDescription.setText(net);
+    }
+
 
     @Subscribe
     public void runningStatus(final MessageTypes.RunningStatus status) {
@@ -133,6 +162,16 @@ public class MainFragment extends Fragment implements AdapterView.OnItemSelected
                     startStop.setText(R.string.stop);
                 else
                     startStop.setText(R.string.start);
+            }
+        });
+    }
+
+    @Subscribe
+    public void updateStatus(final MessageTypes.Status curStatus) {
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                status.setText(curStatus.getStatus());
             }
         });
     }

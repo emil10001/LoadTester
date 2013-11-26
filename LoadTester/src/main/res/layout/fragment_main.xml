@@ -32,9 +32,19 @@
                 android:layout_width="match_parent" />
         </LinearLayout>
 
+        <View
+            android:layout_height="1px"
+            android:layout_width="match_parent"
+            android:background="#383838" />
+
+        <TextView
+            android:id="@+id/status"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#686868" />
 
         <View
-            android:layout_height="32dp"
+            android:layout_height="16dp"
             android:layout_width="match_parent"/>
 
         <Switch

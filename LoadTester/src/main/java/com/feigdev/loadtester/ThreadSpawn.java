@@ -64,7 +64,16 @@ public class ThreadSpawn extends Service {
 
     // is executor alive?
     static boolean isRunning() {
-        return !(null == executorService || executorService.isShutdown() || executorService.isTerminated());
+        boolean isRunning = !(null == executorService || executorService.isShutdown() || executorService.isTerminated());
+        if (isRunning)
+            BusProvider.INSTANCE.bus().post(new MessageTypes.Status("running"));
+        else {
+            BusProvider.INSTANCE.bus().post(new MessageTypes.Status("not running"));
+            BusProvider.INSTANCE.bus().post(new MessageTypes.CpuStatus(""));
+            BusProvider.INSTANCE.bus().post(new MessageTypes.RamStatus(""));
+            BusProvider.INSTANCE.bus().post(new MessageTypes.NetStatus(""));
+        }
+        return isRunning;
     }
 
     // is service alive?
@@ -73,10 +82,13 @@ public class ThreadSpawn extends Service {
     }
 
     static void startSpawner() {
-        if (isRunning())
+        if (isRunning()){
+            BusProvider.INSTANCE.bus().post(new MessageTypes.Status("running"));
             return;
+        }
         if (isWorking) {
-            BusProvider.INSTANCE.bus().post(new MessageTypes.CpuStatus("wait until previous task completed"));
+            BusProvider.INSTANCE.bus().post(new MessageTypes.Status("wait until previous task completed"));
+            BusProvider.INSTANCE.bus().post(new MessageTypes.CpuStatus(""));
             BusProvider.INSTANCE.bus().post(new MessageTypes.RamStatus(""));
             BusProvider.INSTANCE.bus().post(new MessageTypes.NetStatus(""));
             return;
@@ -93,14 +105,12 @@ public class ThreadSpawn extends Service {
 
     static void stopSpawner() {
         if (!isRunning()){
-            BusProvider.INSTANCE.bus().post(new MessageTypes.CpuStatus(""));
-            BusProvider.INSTANCE.bus().post(new MessageTypes.RamStatus(""));
-            BusProvider.INSTANCE.bus().post(new MessageTypes.NetStatus(""));
             return;
         }
 
         if (isWorking) {
-            BusProvider.INSTANCE.bus().post(new MessageTypes.CpuStatus("wait until previous task completed"));
+            BusProvider.INSTANCE.bus().post(new MessageTypes.Status("wait until previous task completed"));
+            BusProvider.INSTANCE.bus().post(new MessageTypes.CpuStatus(""));
             BusProvider.INSTANCE.bus().post(new MessageTypes.RamStatus(""));
             BusProvider.INSTANCE.bus().post(new MessageTypes.NetStatus(""));
             return;
@@ -114,9 +124,11 @@ public class ThreadSpawn extends Service {
         else
             killTask.execute((Void[]) null);
 
+        BusProvider.INSTANCE.bus().post(new MessageTypes.Status("killing..."));
         BusProvider.INSTANCE.bus().post(new MessageTypes.CpuStatus(""));
         BusProvider.INSTANCE.bus().post(new MessageTypes.RamStatus(""));
         BusProvider.INSTANCE.bus().post(new MessageTypes.NetStatus(""));
+        BusProvider.INSTANCE.bus().post(new MessageTypes.RunningStatus());
     }
 
     static void killSpawner() {
@@ -126,13 +138,19 @@ public class ThreadSpawn extends Service {
 
     static void switchModes(Constants mode) {
         if (isWorking) {
-            BusProvider.INSTANCE.bus().post(new MessageTypes.CpuStatus("wait until previous task completed"));
+            BusProvider.INSTANCE.bus().post(new MessageTypes.Status("wait until previous task completed"));
+            BusProvider.INSTANCE.bus().post(new MessageTypes.CpuStatus(""));
             BusProvider.INSTANCE.bus().post(new MessageTypes.RamStatus(""));
+            BusProvider.INSTANCE.bus().post(new MessageTypes.NetStatus(""));
             return;
         }
         if (Constants.MODE == mode) {
-            BusProvider.INSTANCE.bus().post(new MessageTypes.CpuStatus("already in that mode, ignoring"));
-            BusProvider.INSTANCE.bus().post(new MessageTypes.RamStatus(""));
+            BusProvider.INSTANCE.bus().post(new MessageTypes.Status("already in that mode, ignoring"));
+            return;
+        }
+        if (!isRunning()){
+            Constants.MODE = mode;
+            BusProvider.INSTANCE.bus().post(new MessageTypes.Status("mode switched to " + Constants.MODE));
             return;
         }
 
@@ -142,6 +160,8 @@ public class ThreadSpawn extends Service {
             switchMode.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, mode);
         else
             switchMode.execute(mode);
+
+        BusProvider.INSTANCE.bus().post(new MessageTypes.RunningStatus());
     }
 
     static void enqueue() {
@@ -155,8 +175,10 @@ public class ThreadSpawn extends Service {
             Log.e(TAG, "This should never happen, enqueue called with an active executorService");
             return;
         }
-        BusProvider.INSTANCE.bus().post(new MessageTypes.CpuStatus("starting..."));
-
+        BusProvider.INSTANCE.bus().post(new MessageTypes.Status("starting..."));
+        BusProvider.INSTANCE.bus().post(new MessageTypes.CpuStatus(""));
+        BusProvider.INSTANCE.bus().post(new MessageTypes.RamStatus(""));
+        BusProvider.INSTANCE.bus().post(new MessageTypes.NetStatus(""));
         BusProvider.INSTANCE.bus().post(new MessageTypes.RunningStatus());
 
         running = true;
@@ -183,7 +205,7 @@ public class ThreadSpawn extends Service {
     static void killSwitch() {
         Log.w(TAG, "killing all");
         running = false;
-        BusProvider.INSTANCE.bus().post(new MessageTypes.CpuStatus("killing..."));
+        BusProvider.INSTANCE.bus().post(new MessageTypes.Status("killing..."));
 
         removeAllTasks();
         if (null != killer)
@@ -201,6 +223,8 @@ public class ThreadSpawn extends Service {
         }
 
         BusProvider.INSTANCE.bus().post(new MessageTypes.CpuStatus(""));
+        BusProvider.INSTANCE.bus().post(new MessageTypes.RamStatus(""));
+        BusProvider.INSTANCE.bus().post(new MessageTypes.NetStatus(""));
         BusProvider.INSTANCE.bus().post(new MessageTypes.RunningStatus());
     }
 
