@@ -42,3 +42,5 @@ And, when you're done, you can kill it too:
 The configurations for load might need to be tweaked. It's all just guess work at this point, and while I was able to put enough load on my Nexus 5 to freeze it up completely, I haven't figured out what the best parameters are for a consistent load on each setting. Feel free to make pull requests with different values.
 
 If you're looking for an apk, [here's one to download](https://s3.amazonaws.com/ejf3-public/hosted_files/LoadTester-debug-unaligned.apk).
+
+By <a href="plus.google.com/u/0/110693175237378228684?rel=author">E John Feig</a>
